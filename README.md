@@ -22,5 +22,5 @@ It requires a `db esp L100` or similar output from WinDBG like the following:
 ```
 Just copy the output from WinDBG to a file and submit it to the script like:
 ```
-db esp L100
+check_bads.py <file>
 ```
