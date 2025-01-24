@@ -1,3 +1,10 @@
+  _______           __      ___          __               
+ / ___/ /  ___ ____/ /__   / _ )___ ____/ /__   ___  __ __
+/ /__/ _ \/ -_) __/  '_/  / _  / _ `/ _  (_-<_ / _ \/ // /
+\___/_//_/\__/\__/_/\_\__/____/\_,_/\_,_/___(_) .__/\_, / 
+                     /___/                   /_/   /___/  
+                                         by 0x5c4r3
+
 ### check_bads.py
 Quick and simple tool to check for any missing chars when controlling Bad Characters during Buffer Overflow Exploitation.
 It requires a `db esp L100` or similar output from WinDBG like the following:
