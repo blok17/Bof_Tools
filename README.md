@@ -33,5 +33,5 @@ check_bads.py <file>
 ```
 Test run:
 ```
-check_bads.py badchars_example.txt
+check_bads.py -f badchars_example.txt
 ```
