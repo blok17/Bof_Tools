@@ -31,3 +31,7 @@ Just copy the output from WinDBG to a file and submit it to the script like:
 ```
 check_bads.py <file>
 ```
+Test run:
+```
+check_bads.py badchars_example.txt
+```
