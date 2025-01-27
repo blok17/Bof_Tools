@@ -1,6 +1,7 @@
+# Bof Tools
 Bunch of interesting tools to automatize x86/64 BoF Exploitation.
 
-# Check_Bads.py
+### Check_Bads.py
 
 Quick and simple tool to check for any missing chars when controlling Bad Characters during Buffer Overflow Exploitation.
 It will find all the badchars and stop once 4 consecutive badchars are found.
