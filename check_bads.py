@@ -4,15 +4,15 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", help="Input file to analyze")
-parser.add_argument("-b", "--bads", help="Bad characters already found in the form of '00,0a,6b")
+parser.add_argument("-b", "--bads", help="Bad characters already found in the form of '00,0a,6b'")
 parser.add_argument("-e", "--example", help="Print example file format accepted", action="store_true")
 
-print("  _______           __      ___          __               ")
-print(" / ___/ /  ___ ____/ /__   / _ )___ ____/ /__   ___  __ __")
-print("/ /__/ _ \\/ -_) __/  '_/  / _  / _ `/ _  (_-<_ / _ \\/ // /")
-print("\\___/_//_/\\__/\\__/_/\\_\\__/____/\\_,_/\\_,_/___(_) .__/\\_, / ")
-print("                     /___/                   /_/   /___/  ")
-print("                                         by 0x5c4r3\n")
+print(Fore.MAGENTA + "  _______           __      ___          __               ")
+print(Fore.MAGENTA + " / ___/ /  ___ ____/ /__   / _ )___ ____/ /__   ___  __ __")
+print(Fore.MAGENTA + "/ /__/ _ \\/ -_) __/  '_/  / _  / _ `/ _  (_-<_ / _ \\/ // /")
+print(Fore.MAGENTA + "\\___/_//_/\\__/\\__/_/\\_\\__/____/\\_,_/\\_,_/___(_) .__/\\_, / ")
+print(Fore.MAGENTA + "                     /___/                   /_/   /___/  ")
+print(Fore.MAGENTA + "                                         by 0x5c4r3\n")
 
 args = parser.parse_args()
 
@@ -42,6 +42,14 @@ bad_chars = []
 
 if(args.bads):
     bad_chars = args.bads.split(",")
+    if('00' in bad_chars):
+        bad_chars.remove('00')
+    for a in bad_chars:
+        if a not in o_array:
+            print("The fuck is this? -->",end='')
+            print(Fore.RED, a)
+            sys.exit()
+
 
 try:
     f = open(args.file, "r")
@@ -77,20 +85,20 @@ for word in i_array:
 
 counter = 0
 overflow = 0
+last_index = 0
 
 final = []
 reds = []
+
+tot_words_green = 0
+tot_badchars = len(bad_chars)
+
+
 for o_word in o_array:
-    
-    #Check for eof
-    if counter > len(o_array)-1:
-        print(Fore.GREEN + "No char missing.")
-        sys.exit()
-    
     #Check for only interesting words
     while(len(i_word[counter]) != 2 and len(i_word[counter]) != 5):
         counter = counter + 1
-    
+     
     #Already Found BadChar Detected, Skip Iteration
     if(o_word in bad_chars):
         overflow = 0
@@ -98,19 +106,20 @@ for o_word in o_array:
 
     #New BadChar Detected
     elif(i_word[counter] not in bad_chars and i_word[counter] != o_word):
-        #print(Fore.RED + "Missing Char:", o_word)
         reds.append(o_word)
         final.append(o_word)
         overflow = overflow +1
+        counter = counter + 1
+        if(overflow == 1):
+            last_index = o_array.index(o_word) + 1
         
         if(overflow == 4):
-            last_index = o_array.index(o_word)
-            print(Fore.RED + "[+] More than 4 chars misplaced, correct and re-iterate.")
             c = 0
             print(Fore.BLUE + "###############################################")
             for i in final:
                 if c == 16:
                     print("\n",end='')
+                    c = 0
                 if(i in reds):
                     print(Fore.RED + i + " ",end='')
                     c = c+1
@@ -118,14 +127,58 @@ for o_word in o_array:
                     print(Fore.WHITE + i + " ",end='')
                     c = c+1
             print(Fore.BLUE + "\n###############################################")
+            print(Fore.RED + "[+] More than 4 chars misplaced, correct and re-iterate.")
+            print("Buffer Length before bad char: ",end='')
+            print(Fore.YELLOW + str(last_index))
+            f.close()
             sys.exit()
 
 
     #If all good, keep going
     elif(i_word[counter] == o_word):
         overflow = 0
+        tot_words_green = tot_words_green + 1
         counter = counter+1
         final.append(o_word)
         continue
 
+
+if(len(reds) == 0):
+    if(tot_badchars + tot_words_green == 255):
+        print(Fore.GREEN,"#########################")
+        print(Fore.GREEN,"# ",end='')
+        print(Fore.GREEN + "   No char missing",end='')
+        print(Fore.GREEN,"   #")
+        print(Fore.GREEN,"#########################")
+        print(Fore.WHITE + "\nTot Words Checked:",end='')
+        print(Fore.GREEN, tot_words_green)
+        print(Fore.WHITE + "Tot Bad Chars:", end='')
+        print(Fore.YELLOW, tot_badchars,end='')
+        print(Fore.BLUE, "--->",end='')
+        if "00" not in bad_chars:
+            bad_chars.insert(0,'00')
+        for i in bad_chars:
+            print(Fore.RED,i,end='')
+    else:
+        print(Fore.RED, "--- Bad Configuration ---")
+        print(Fore.WHITE + "Tot Words Checked:",end='')
+        print(Fore.RED, tot_words_green)
+        print(Fore.WHITE + "Tot Bad Chars:", end='')
+        print(Fore.RED, tot_badchars)
+else:
+    c = 0
+    print(Fore.BLUE + "\n###############################################")
+    for i in final:
+        if c == 16:
+            print("\n",end='')
+            c = 0
+        if(i in reds):
+            print(Fore.RED + i + " ",end='')
+            c = c + 1
+        else:
+            print(Fore.WHITE + i + " ",end='')
+            c = c + 1
+    print(Fore.BLUE + "\n###############################################")
 f.close()
+sys.exit()
+
