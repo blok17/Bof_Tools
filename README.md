@@ -35,3 +35,7 @@ Test run:
 ```
 check_bads.py -f badchars_example.txt
 ```
+
+
+### References
+https://github.com/epi052/osed-scripts/tree/main
