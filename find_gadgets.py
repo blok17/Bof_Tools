@@ -18,7 +18,7 @@ print(Fore.MAGENTA + "                                                     by 0x
 print(Fore.WHITE + "")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-f", "--files", help="Comma separated list of input files to get gadgets from (i.e. /opt/lib1.dll,/opt/lib2.dll)")
+parser.add_argument("-f", "--files", help="Comma separated list of input files to get gadgets from (i.e. /opt/lib1.dll,/opt/lib2.dll). If used with -s, input file to search from (i.e. /opt/lib1_gadgets.txt).")
 parser.add_argument("-b", "--bads", help="Comma separated list of bad characters (i.e. 00,0a,ba)")
 parser.add_argument("-B", "--base", help="Use default image offset", default=False)#, action=argparse.BooleanOptionalAction)
 parser.add_argument("-o", "--output", help="Output file. If not set, output to stdout")
