@@ -51,7 +51,7 @@ options:
   -o, --output          save the egghunter into a egghunter.bin file to then encode it
 ```
 ---
-### egghunter.py
+### find_gadgets.py
 
 Quick and simple tool to dump/search gadgets based on one or more files.
 ```
