@@ -76,7 +76,10 @@ def dump_gadgets(file_path, args):
         print(Fore.GREEN,cmd)
     output = subprocess.run(cmd, shell=True, capture_output=True)
     if output.stderr:
-        print("Error with rp++")
+        if "linux" in sys.platform:
+            print(Fore.RED, "Error with rp-lin. Is it in this folder?")
+        elif "win32" in sys.platform:
+            print(Fore.RED, "Error with rp++.exe. Is it in this folder?")
         #print(Fore.RED, f"{ERR} stderr on rp++")
         #print(Fore.RED, f"{ERR} {output.stderr.decode()}")
     output_lines = output.stdout.decode().split('\n')
@@ -200,8 +203,4 @@ if(args.files is not None):
 #except:
 #    print("Please Submit File.")
 #    exit()
-
-
-
-
 
