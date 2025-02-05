@@ -77,9 +77,12 @@ def dump_gadgets(file_path, args):
     output = subprocess.run(cmd, shell=True, capture_output=True)
     if output.stderr:
         if "linux" in sys.platform:
-            print(Fore.RED, "Error with rp-lin. Is it in this folder?")
+            print(Fore.RED, "[+] Error with rp-lin.")
+            print("Is it in the current folder?")
+            print("Is it executable? (chmod +x rp-lin)")
         elif "win32" in sys.platform:
-            print(Fore.RED, "Error with rp++.exe. Is it in this folder?")
+            print(Fore.RED, "[+] Error with rp++.exe.")
+            print("Is it in the current folder?")
         #print(Fore.RED, f"{ERR} stderr on rp++")
         #print(Fore.RED, f"{ERR} {output.stderr.decode()}")
     output_lines = output.stdout.decode().split('\n')
