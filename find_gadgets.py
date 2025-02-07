@@ -20,12 +20,13 @@ print(Fore.WHITE + "")
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--files", help="Comma separated list of input files to get gadgets from (i.e. /opt/lib1.dll,/opt/lib2.dll). If used with -s, input file to search from (i.e. /opt/lib1_gadgets.txt).")
 parser.add_argument("-b", "--bads", help="Comma separated list of bad characters (i.e. 00,0a,ba)")
-parser.add_argument("-B", "--base", help="Use default image offset", default=False)#, action=argparse.BooleanOptionalAction)
 parser.add_argument("-o", "--output", help="Output file. If not set, output to stdout")
-parser.add_argument("-c", "--clean", help="Print out the cleanest gadgets (avoid gadgets with ops like 'call,'jmp'...)", action='store_true')
 parser.add_argument("-s", "--search", help="Regex search through gadgets (to be used with -f)")
+parser.add_argument("-ns", "--nsearch", help="Negative regex search through gadgets (to be used with -f)", default = "$^")
+parser.add_argument("-c", "--clean", help="Print out the cleanest gadgets (avoid gadgets with ops like 'call,'jmp'...)", action='store_true')
 parser.add_argument("-rn", "--result_number", help="Max number of search result in output (to be used with -s)", default=10)
 parser.add_argument("-F", "--formatted", help="Format search output lines to be like 'payload += struct.pack(\"<L\",0x12345678)' # pop esp # xchg eax,ebx # ret # [file.dll]", action='store_true')
+parser.add_argument("-B", "--base", help="Use default image offset", default=False)
 
 
 args = parser.parse_args()
@@ -36,15 +37,17 @@ args = parser.parse_args()
 
 ############# SEARCH ##################################
 
-def find_gadget_with_regex(file, regex, max_results, formatted):
+def find_gadget_with_regex(file, regex, max_results, formatted, negative):
     regex = re.compile(regex)
+    negative = re.compile(negative)
+    
     matching_lines = []
     
     with open(file, 'r') as file:
         lines = [line.rstrip() for line in file]
         for gadget in lines:
-            # search with regex # and exclude filters
-            if regex.search(gadget): #and not any(f in gadget for f in filter):
+            # search with regex and exclude filters
+            if regex.search(gadget) and not negative.search(gadget):
                 if(formatted):
                     gadget_formatted = "payload += struct.pack(\"<L\"," + gadget.split(':')[0] + ") #" + gadget.split(':')[1]
                     matching_lines.append(gadget_formatted)
@@ -109,7 +112,7 @@ def dump_gadgets(file_path, args):
 
 ############ CHECK BAD OPERATIONS ##################### 
         if(args.clean == 1):
-            bad_ops = ['clts','hlt','outsd','outsb','lmsw','ltr','lgdt','lidt','lldt','mov cr','mov dr','mov tr','in','ins','invlpg','invd','out','outs','cli','cli','sti','popf','pushf','int','iret','iretd','swapgs','wbinvd','call','jmp','leave','ja','jb','jc','je','jr','jg','jl','jn','jo','jp','js','jz','lock','enter','enter','wait','???']
+            bad_ops = ['clts','hlt','outsd','outsb','lmsw','ltr','lgdt','lidt','lldt','mov cr','mov dr','mov tr','ins','invlpg','invd','out','outs','cli','cli','sti','popf','pushf','int','iret','iretd','swapgs','wbinvd','call','jmp','leave','ja','jb','jc','je','jr','jg','jl','jn','jo','jp','js','jz','lock','enter','enter','wait','???']
             
             ops_array = line.split(' ; \\x')[0].split(': ')[1].split(' # [')[0].split(' # ') 
             ops_address = line.split(':')[0]
@@ -137,11 +140,15 @@ if(args.search is None and args.files is None):
 
 if(args.search is not None):
     result = []
-    for line in find_gadget_with_regex(args.files, args.search, max_results=args.result_number, formatted=args.formatted):
+    for line in find_gadget_with_regex(args.files, args.search, args.result_number, args.formatted, args.nsearch):
         result.append(line)    
    
+    line_number = 1
     if(args.formatted):
         for i in result:
+            number = "[" + str(line_number) + "] "
+            print(Fore.WHITE,number,end='')
+            line_number = line_number + 1
             print(i)
         print(Fore.GREEN, "\n[+] Formatted Output.")
         exit()
@@ -149,7 +156,11 @@ if(args.search is not None):
     if len(result) == 0:
         print(Fore.RED, "[+] No results found based on your search.")
         exit() 
+
     for i in result:
+        number = "[" + str(line_number) + "]"
+        print(Fore.WHITE,number,end='')
+        line_number = line_number + 1
         print(Fore.GREEN,i.split(' ')[0].split(':')[0],end='')
         print(Fore.WHITE,i.split(':')[1].split(' # [')[0],end='')
         print(Fore.BLUE,'[ '+ i.split(' # [\'')[1].split('\']')[0] + ' ]') 
