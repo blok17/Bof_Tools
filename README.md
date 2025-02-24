@@ -2,6 +2,18 @@
 
 Bunch of interesting tools to automatize x86/64 BoF Exploitation.
 
+#### Configuration:
+
+In C:\Program Files\Windows Kits\10\Debuggers\x86:
+- windbglib.py
+- windbglib.pyc
+- mona.py
+
+In C:\Program Files\Windows Kits\10\Debuggers\x86\winext:
+- pykd2.pyd
+- pykd3.dll
+- narly.dll
+
 ---
 ### Check_Bads.py
 
