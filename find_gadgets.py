@@ -26,7 +26,7 @@ parser.add_argument("-ns", "--nsearch", help="Negative regex search through gadg
 parser.add_argument("-c", "--clean", help="Print out the cleanest gadgets (avoid gadgets with ops like 'call,'jmp'...)", action='store_true')
 parser.add_argument("-rn", "--result_number", help="Max number of search result in output (to be used with -s)", default=10)
 parser.add_argument("-F", "--formatted", help="Format search output lines to be like 'payload += struct.pack(\"<L\",0x12345678)' # pop esp # xchg eax,ebx # ret # [file.dll]", action='store_true')
-parser.add_argument("-B", "--base", help="Use default image offset", default=False)
+parser.add_argument("--base", help="Use custom BaseAddress (for ASLR)", default=False)
 
 
 args = parser.parse_args()
@@ -74,7 +74,7 @@ def dump_gadgets(file_path, args):
         print(" Running: ",end='')
         print(Fore.GREEN, cmd)
     else:
-        cmd = f'{executable} --va 0x0 -r 5 -f {file_path}'
+        cmd = f'{executable} -r 5 -f {file_path} --va ' + args.base
         print(" Running: ",end='')
         print(Fore.GREEN,cmd)
     output = subprocess.run(cmd, shell=True, capture_output=True)
