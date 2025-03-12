@@ -3,7 +3,11 @@
 Bunch of interesting tools to automatize x86/64 BoF Exploitation.
 
 #### Configuration:
+##### Automatic
+Open a smb share on Bof_tools and access it from the Windows Remote machine.
+Run config.ps1.
 
+##### Manual
 In C:\Program Files\Windows Kits\10\Debuggers\x86:
 - windbglib.py
 - windbglib.pyc
