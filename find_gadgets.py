@@ -4,7 +4,7 @@ import argparse
 from colorama import Fore
 import os.path
 import subprocess
-from textwrap import wrap
+import textwrap
 import re
 from pathlib import Path
 
@@ -17,16 +17,19 @@ print(Fore.MAGENTA + "                 /_____/____/            /____/           
 print(Fore.MAGENTA + "                                                     by 0x5c4r3")
 print(Fore.WHITE + "")
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("-f", "--files", help="Comma separated list of input files to get gadgets from (i.e. /opt/lib1.dll,/opt/lib2.dll). If used with -s, input file to search from (i.e. /opt/lib1_gadgets.txt).")
 parser.add_argument("-b", "--bads", help="Comma separated list of bad characters (i.e. 00,0a,ba)")
 parser.add_argument("-o", "--output", help="Output file. If not set, output to stdout")
 parser.add_argument("-s", "--search", help="Regex search through gadgets (to be used with -f)")
 parser.add_argument("-ns", "--nsearch", help="Negative regex search through gadgets (to be used with -f)", default = "$^")
-parser.add_argument("-c", "--clean", help="Print out the cleanest gadgets (avoid gadgets with ops like 'call,'jmp'...)", action='store_true')
+parser.add_argument("-c", "--clean", help="Print out the cleanest gadgets (avoid gadgets with ops like 'call,'jmp'...)", action='store_true', default=False)
 parser.add_argument("-rn", "--result_number", help="Max number of search result in output (to be used with -s)", default=10)
-parser.add_argument("-F", "--formatted", help="Format search output lines to be like 'payload += struct.pack(\"<L\",0x12345678)' # pop esp # xchg eax,ebx # ret # [file.dll]", action='store_true')
-parser.add_argument("--base", help="Use custom BaseAddress (for ASLR)", default=False)
+parser.add_argument("-F", "--formatted", help=textwrap.dedent('''Format output for search function, choosing between:
+- packed: "payload += struct.pack(\"<L\",0x12345678)"
+- offset: "payload += struct.pack(\"<L\", dll_base + 0x123)", to be used with dynamically fetched dll base address to bypass ASLR'''))
+parser.add_argument("--base", help="Use custom specified BaseAddress (for ASLR Bypassing)", default=False)
+
 
 
 args = parser.parse_args()
@@ -48,8 +51,16 @@ def find_gadget_with_regex(file, regex, max_results, formatted, negative):
         for gadget in lines:
             # search with regex and exclude filters
             if regex.search(gadget) and not negative.search(gadget):
-                if(formatted):
+                if(formatted == "packed"):
                     gadget_formatted = "payload += struct.pack(\"<L\"," + gadget.split(':')[0] + ") #" + gadget.split(':')[1]
+                    matching_lines.append(gadget_formatted)
+                elif(formatted == "offset"):
+                    if(".dll" in gadget):
+                        gadget_formatted = "payload += struct.pack(\"<L\", " + gadget.split(' # [\'')[1].split('.dll\']')[0] + " + 0x" + gadget.split(':')[0][-5:] + ") #" + gadget.split(':')[1]
+                    elif(".exe" in gadget):
+                        gadget_formatted = "payload += struct.pack(\"<L\", " + gadget.split(' # [\'')[1].split('.exe\']')[0] + " + 0x" + gadget.split(':')[0][-5:] + ") #" + gadget.split(':')[1]
+                    else:
+                        gadget_formatted = "payload += struct.pack(\"<L\", " + gadget.split(' # [\'')[1].split('.\']')[0] + " + 0x" + gadget.split(':')[0][-5:] + ") #" + gadget.split(':')[1]
                     matching_lines.append(gadget_formatted)
                 else:    
                     matching_lines.append(gadget)
@@ -83,19 +94,19 @@ def dump_gadgets(file_path, args):
             print(Fore.RED, "[+] Error with rp-lin.")
             print("Is it in the current folder?")
             print("Is it executable? (chmod +x rp-lin)")
+            exit()
         elif "win32" in sys.platform:
             print(Fore.RED, "[+] Error with rp++.exe.")
             print("Is it in the current folder?")
+            exit()
         #print(Fore.RED, f"{ERR} stderr on rp++")
         #print(Fore.RED, f"{ERR} {output.stderr.decode()}")
     output_lines = output.stdout.decode().split('\n')
     
     data = []
     for i in output_lines:
-        
-        if "ret" not in i:
+        if ("ret" not in i and "jmp" not in i and "call" not in i):
             continue
-
 ############ CHECK BAD CHARACTERS #####################
         if(args.bads):
             part = i
@@ -112,7 +123,7 @@ def dump_gadgets(file_path, args):
 
 ############ CHECK BAD OPERATIONS ##################### 
         if(args.clean == 1):
-            bad_ops = ['clts','hlt','outsd','outsb','lmsw','ltr','lgdt','lidt','lldt','mov cr','mov dr','mov tr','ins','invlpg','invd','out','outs','cli','cli','sti','popf','pushf','int','iret','iretd','swapgs','wbinvd','call','jmp','leave','ja','jb','jc','je','jr','jg','jl','jn','jo','jp','js','jz','lock','enter','enter','wait','???']
+            bad_ops = ['clts','hlt','outsd','outsb','lmsw','ltr','lgdt','lidt','lldt','mov cr','mov dr','mov tr','ins','invlpg','invd','out','outs','cli','cli','sti','popf','pushf','int','iret','iretd','swapgs','wbinvd','leave','ja','jb','jc','je','jr','jg','jl','jn','jo','jp','js','jz','lock','enter','enter','wait','???']
             
             ops_array = line.split(' ; \\x')[0].split(': ')[1].split(' # [')[0].split(' # ') 
             ops_address = line.split(':')[0]
@@ -128,16 +139,16 @@ def dump_gadgets(file_path, args):
                 continue
             else:
                 is_bad = 0
-
         data.append(line)
     return data
 
 #################### MAIN #############################
-#try:
+
 if(args.search is None and args.files is None):
     parser.print_help(sys.stderr)
     exit()
 
+################### SEARCH
 if(args.search is not None):
     result = []
     for line in find_gadget_with_regex(args.files, args.search, args.result_number, args.formatted, args.nsearch):
@@ -146,10 +157,12 @@ if(args.search is not None):
     line_number = 1
     if(args.formatted):
         for i in result:
-            number = "[" + str(line_number) + "] "
+            number = "[" + str(line_number) + "]"
             print(Fore.WHITE,number,end='')
             line_number = line_number + 1
-            print(i)
+            print(Fore.GREEN,i.split(' p')[0].split(') ')[0] + ')',end='')
+            print(Fore.WHITE,i.split(') ')[1].split(' # [')[0],end='')
+            print(Fore.BLUE,'[ '+ i.split(' # [\'')[1].split('\']')[0] + ' ]') 
         print(Fore.GREEN, "\n[+] Formatted Output.")
         exit()
 
@@ -158,12 +171,14 @@ if(args.search is not None):
         exit() 
 
     for i in result:
+        #Normal Printing Without formatting
         number = "[" + str(line_number) + "]"
         print(Fore.WHITE,number,end='')
         line_number = line_number + 1
         print(Fore.GREEN,i.split(' ')[0].split(':')[0],end='')
         print(Fore.WHITE,i.split(':')[1].split(' # [')[0],end='')
         print(Fore.BLUE,'[ '+ i.split(' # [\'')[1].split('\']')[0] + ' ]') 
+        
     
     if(args.result_number != 10):
         print(Fore.WHITE, '\n [+]',end='')
@@ -177,6 +192,7 @@ if(args.search is not None):
         print(Fore.YELLOW, "If not enough, specify the max number of results with -rn")
     exit()
 
+####################### DUMP GADGETS
 clean_messed_gadgets = []
 if(args.files is not None):
     
@@ -213,8 +229,4 @@ if(args.files is not None):
     else:
         for i in clean_sorted_gadgets:
             print(Fore.WHITE,i)
-
-#except:
-#    print("Please Submit File.")
-#    exit()
 
