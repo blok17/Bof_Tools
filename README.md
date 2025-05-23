@@ -1,4 +1,5 @@
 # Bof Tools
+<img src='https://sdmntprukwest.oaiusercontent.com/files/00000000-5108-6243-b336-91c8df3cdf5e/raw?se=2025-05-23T09%3A50%3A41Z&sp=r&sv=2024-08-04&sr=b&scid=95fc07b6-68b4-50f8-9dee-d4875aadac8c&skoid=82a3371f-2f6c-4f81-8a78-2701b362559b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-05-23T07%3A24%3A25Z&ske=2025-05-24T07%3A24%3A25Z&sks=b&skv=2024-08-04&sig=qpTCaMnlVzD%2BVzNcqgEHYZp55rIRigabDOc0EoGs4Xg%3D'>
 
 Bunch of interesting tools to automatize x86/64 BoF Exploitation.
 
