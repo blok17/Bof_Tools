@@ -59,29 +59,16 @@ except:
     print("usage: check_bads.py [-h] [-f FILE] [-b BADS] [-e]")
     sys.exit()
 
-pre = []
-post = []
 i_word = []
-check = 0
+# transforming row of opcodes in array of opcodes
 for word in i_array:
-    position = i_array.index(word)
-    if len(word) == 2 and check == 0:
-        pre.append(word)
-    if len(word) == 5:
-        check = 1
+    word = word.rstrip()
+    if len(word) == 2:
+        i_word.append(word)
+    if (len(word) == 5):
         part = word.split('-')
-        pre.append(part[0])
-        pre.append(part[1])
-    if len(word) == 2 and check == 1:
-        post.append(word)
-    if len(word) > 8:
-        for p in pre:
-            i_word.append(p)
-        for p in post:
-            i_word.append(p)
-        check = 0
-        pre = []
-        post = []
+        i_word.append(part[0])
+        i_word.append(part[1])
 
 counter = 0
 overflow = 0
