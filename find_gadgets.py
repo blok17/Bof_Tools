@@ -33,6 +33,7 @@ parser.add_argument("--base", help="Use custom specified BaseAddress (for ASLR B
 
 
 args = parser.parse_args()
+current_folder = os.path.dirname(os.path.abspath(__file__))
 
 #######################################################
 ################### FUNCTIONS #########################
@@ -74,7 +75,7 @@ def find_gadget_with_regex(file, regex, max_results, formatted, negative):
 
 def dump_gadgets(file_path, args):
     if "linux" in sys.platform:
-        executable = './rp-lin'
+        executable = current_folder + '/rp-lin'
     elif "win32" in sys.platform:
         executable = 'rp++.exe'
     else:
