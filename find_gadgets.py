@@ -14,7 +14,7 @@ print(Fore.MAGENTA + "  / /_/ / __ \\/ __  /    / __ `/ __ `/ __  / __ `/ _ \\/ 
 print(Fore.MAGENTA + " / __/ / / / / /_/ /    / /_/ / /_/ / /_/ / /_/ /  __/ /_(__  ) / /_/ / /_/ / ")
 print(Fore.MAGENTA + "/_/ /_/_/ /_/\\__,_/_____\\__, /\\__,_/\\__,_/\\__, /\\___/\\__/____(_) .___/\\__, /  ")
 print(Fore.MAGENTA + "                 /_____/____/            /____/               /_/    /____/   ")
-print(Fore.MAGENTA + "                                                     by 0x5c4r3")
+print(Fore.MAGENTA + "                                                     by blok17")
 print(Fore.WHITE + "")
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
@@ -29,8 +29,6 @@ parser.add_argument("-F", "--formatted", help=textwrap.dedent('''Format output f
 - packed: "payload += struct.pack(\"<L\",0x12345678)"
 - offset: "payload += struct.pack(\"<L\", dll_base + 0x123)", to be used with dynamically fetched dll base address to bypass ASLR'''))
 parser.add_argument("--base", help="Use custom specified BaseAddress (for ASLR Bypassing)", default=False)
-
-
 
 args = parser.parse_args()
 current_folder = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +50,16 @@ def find_gadget_with_regex(file, regex, max_results, formatted, negative):
         for gadget in lines:
             # search with regex and exclude filters
             if regex.search(gadget) and not negative.search(gadget):
+
+                if(args.bads):
+                    address = gadget.split(' ')[0]
+                    address = address.replace(':','')
+                    #couples = [address[part:part+2] for part in range(0, len(address), 2)]
+                    couples = [address[part:part+2] for part in range(len(address)-2, -1, -2)][::-1] + ([address[-1]] if len(address) % 2 != 0 else [])
+                    bad_chars = args.bads.split(',')
+                    if(any(x in couples for x in bad_chars)):
+                        continue
+
                 if(formatted == "packed"):
                     gadget_formatted = "payload += struct.pack(\"<L\"," + gadget.split(':')[0] + ") #" + gadget.split(':')[1]
                     matching_lines.append(gadget_formatted)
@@ -65,7 +73,7 @@ def find_gadget_with_regex(file, regex, max_results, formatted, negative):
                     matching_lines.append(gadget_formatted)
                 else:    
                     matching_lines.append(gadget)
-                
+
                 if len(matching_lines) >= int(max_results):
                     break
     return matching_lines
@@ -103,7 +111,6 @@ def dump_gadgets(file_path, args):
         #print(Fore.RED, f"{ERR} stderr on rp++")
         #print(Fore.RED, f"{ERR} {output.stderr.decode()}")
     output_lines = output.stdout.decode().split('\n')
-    
     data = []
     for i in output_lines:
         if ("ret" not in i and "jmp" not in i and "call" not in i):
@@ -113,8 +120,10 @@ def dump_gadgets(file_path, args):
             part = i
             address = part.split(' ')[0]
             address = address.replace(':','')
-            couples = [address[part:part+2] for part in range(0, len(address), 2)]
+            #couples = [address[part:part+2] for part in range(0, len(address), 2)]
+            couples = [address[part:part+2] for part in range(len(address)-2, -1, -2)][::-1] + ([address[-1]] if len(address) % 2 != 0 else [])
             bad_chars = args.bads.split(',')
+            
             if(any(x in couples for x in bad_chars)):
                 continue
         
@@ -124,7 +133,7 @@ def dump_gadgets(file_path, args):
 
 ############ CHECK BAD OPERATIONS ##################### 
         if(args.clean == 1):
-            bad_ops = ['clts','hlt','outsd','outsb','lmsw','ltr','lgdt','lidt','lldt','mov cr','mov dr','mov tr','ins','invlpg','invd','out','outs','cli','cli','sti','popf','pushf','int','iret','iretd','swapgs','wbinvd','leave','ja','jb','jc','je','jr','jg','jl','jn','jo','jp','js','jz','lock','enter','enter','wait','???']
+            bad_ops = ['call','jmp','clts','hlt','outsd','outsb','lmsw','ltr','lgdt','lidt','lldt','mov cr','mov dr','mov tr','ins','invlpg','invd','out','outs','cli','sti','popf','pushf','int','iret','iretd','swapgs','wbinvd','leave','ja','jb','jc','je','jr','jg','jl','jn','jo','jp','js','jz','lock','enter','enter','wait','???']
             
             ops_array = line.split(' ; \\x')[0].split(': ')[1].split(' # [')[0].split(' # ') 
             ops_address = line.split(':')[0]
@@ -208,15 +217,14 @@ if(args.files is not None):
             exit()
 
     clean_sorted_gadgets = sorted(clean_messed_gadgets, key=len)
-
-    print(Fore.GREEN, '[+]',end='')
-    print(Fore.GREEN, len(clean_sorted_gadgets), "gadgets found.")
+    if(args.search is not None):
+        print(Fore.GREEN, '[+]',end='')
+        print(Fore.GREEN, len(clean_sorted_gadgets), "gadgets found.")
     extensions = ['exe','dll']
     if(len(clean_sorted_gadgets) == 0 and file_path.split('.')[1] not in extensions):
-        print(Fore.YELLOW, "[-] Extension not recognized:", file_path.split('.')[1])
-        print(Fore.YELLOW, 'Maybe wrong file? ->',end='')
+        print(Fore.YELLOW, "\n[-] Extension not recognized:", end='')
         print(Fore.WHITE,file)
-
+        print(Fore.YELLOW, "    Maybe you wanted to search (-s) ?")
     if(args.output):
         output_file = args.output
         f = open(output_file, "w")
