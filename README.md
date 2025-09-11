@@ -75,8 +75,10 @@ options:
   --base BASE           Use custom specified BaseAddress (for ASLR Bypassing) 
 ```
 
-All the other tools are taken from the below listed references:<\br>
-https://github.com/epi052/osed-scripts<\br>
-https://github.com/nop-tech/code_caver<\br>
-https://github.com/epi052/osed-scripts<\br>
-https://github.com/0vercl0k/rp<\br>
+All the other tools are taken from the below listed references:
+
+- https://github.com/epi052/osed-scripts
+- https://github.com/nop-tech/code_caver
+- https://github.com/epi052/osed-scripts
+- https://github.com/0vercl0k/rp
+
