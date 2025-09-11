@@ -108,8 +108,6 @@ def dump_gadgets(file_path, args):
             print(Fore.RED, "[+] Error with rp++.exe.")
             print("Is it in the current folder?")
             exit()
-        #print(Fore.RED, f"{ERR} stderr on rp++")
-        #print(Fore.RED, f"{ERR} {output.stderr.decode()}")
     output_lines = output.stdout.decode().split('\n')
     data = []
     for i in output_lines:
