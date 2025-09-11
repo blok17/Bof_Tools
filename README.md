@@ -23,7 +23,7 @@ In C:\Program Files\Windows Kits\10\Debuggers\x86\winext:
 
 Quick and simple tool to check for any missing chars when controlling Bad Characters during Buffer Overflow Exploitation.
 It will find all the badchars and stop once 4 consecutive badchars are found.
-It requires a `db esp L100` with the output aligned to start with `01`.
+It requires a `db esp L100`, aligned so that it starts with `01`. An example named 'badchar_example.txt' is provided in the repository.
 ```
   _______           __      ___          __               
  / ___/ /  ___ ____/ /__   / _ )___ ____/ /__   ___  __ __
@@ -79,23 +79,23 @@ Quick and simple tool to dump/search gadgets based on one or more files.
                  /_____/____/            /____/               /_/    /____/   
                                                      by 0x5c4r3
 
-usage: find_gadgets.py [-h] [-f FILES] [-b BADS] [-B BASE] [-o OUTPUT] [-c] [-s SEARCH] [-rn RESULT_NUMBER] [-F]
-
-options:
-  -h, --help            show this help message and exit
-  -f FILES, --files FILES
-                        Comma separated list of input files to get gadgets from (i.e. /opt/lib1.dll,/opt/lib2.dll). If used with -s, input file to search from (i.e. /opt/lib1_gadgets.txt).
-  -b BADS, --bads BADS  Comma separated list of bad characters (i.e. 00,0a,ba)
-  -B BASE, --base BASE  Use default image offset
-  -o OUTPUT, --output OUTPUT
-                        Output file. If not set, output to stdout
-  -c, --clean           Print out the cleanest gadgets (avoid gadgets with ops like 'call,'jmp'...)
-  -s SEARCH, --search SEARCH
-                        Regex search through gadgets (to be used with -f)
-  -rn RESULT_NUMBER, --result_number RESULT_NUMBER
-                        Max number of search result in output (to be used with -s)
-  -F, --formatted       Format search output lines to be like 'payload += struct.pack("<L",0x12345678)' # pop esp # xchg eax,ebx # ret # [file.dll]
-
+usage: find_gadgets.py [-h] [-f FILES] [-b BADS] [-o OUTPUT] [-s SEARCH] [-ns NSEARCH] [-c] [-rn RESULT_NUMBER] [-F FORMATTED] [--base BASE]                                                                     
+options:                                                                                                                                                                                  
+  -h, --help            show this help message and exit                                                                                                                                   
+  -f, --files FILES     Comma separated list of input files to get gadgets from (i.e. /opt/lib1.dll,/opt/lib2.dll). If used with -s, input file to search from (i.e. /opt/lib1_gadgets.txt).                  
+  -b, --bads BADS       Comma separated list of bad characters (i.e. 00,0a,ba)                                                                                                            
+  -o, --output OUTPUT   Output file. If not set, output to stdout                                                                                                                         
+  -s, --search SEARCH   Regex search through gadgets (to be used with -f)                                                                                                                 
+  -ns, --nsearch NSEARCH                                                                                                                                                                  
+                        Negative regex search through gadgets (to be used with -f)                                                                                                        
+  -c, --clean           Print out the cleanest gadgets (avoid gadgets with ops like 'call,'jmp'...)                                                                                       
+  -rn, --result_number RESULT_NUMBER                                                                                                                                                      
+                        Max number of search result in output (to be used with -s)                                                                                                        
+  -F, --formatted FORMATTED                                                                                                                                                               
+                        Format output for search function, choosing between:                                                                                                              
+                        - packed: "payload += struct.pack("<L",0x12345678)"                                                                                                               
+                        - offset: "payload += struct.pack("<L", dll_base + 0x123)", to be used with dynamically fetched dll base address to bypass ASLR                                   
+  --base BASE           Use custom specified BaseAddress (for ASLR Bypassing) 
 ```
 
 ### References
