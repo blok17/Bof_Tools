@@ -75,7 +75,7 @@ options:
   --base BASE           Use custom specified BaseAddress (for ASLR Bypassing) 
 ```
 
-All the other tools are taken from the below listed references:
+All the other tools are taken from the following references:
 
 - https://github.com/epi052/osed-scripts
 - https://github.com/nop-tech/code_caver
