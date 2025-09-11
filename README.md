@@ -43,30 +43,7 @@ options:
 
 ```
 ---
-### egghunter.py
 
-Quick and simple tool to create egghunters based on user configuration.
-```
-                    __                __                       
-  ___  ____ _____ _/ /_  __  ______  / /____  _________  __  __
- / _ \/ __ `/ __ `/ __ \/ / / / __ \/ __/ _ \/ ___/ __ \/ / / /
-/  __/ /_/ / /_/ / / / / /_/ / / / / /_/  __/ /  / /_/ / /_/ / 
-\___/\__, /\__, /_/ /_/\__,_/_/ /_/\__/\___/_(_)/ .___/\__, /  
-    /____//____/                               /_/    /____/   
-                                             by 0x5c4r3        
-
-
-usage: egghunter.py [-h] [-t TAG] [-b BAD_CHARS [BAD_CHARS ...]] [-s] [-o]
-
-options:
-  -h, --help            show this help message and exit
-  -t TAG, --tag TAG     tag for which the egghunter will search (default: c0d3)
-  -b BAD_CHARS [BAD_CHARS ...], --bad-chars BAD_CHARS [BAD_CHARS ...]
-                        space separated list of bad chars to check for in final egghunter without ' nor " (default: 00)
-  -s, --seh             create an seh based egghunter instead of NtAccessCheckAndAuditAlarm
-  -o, --output          save the egghunter into a egghunter.bin file to then encode it
-```
----
 ### find_gadgets.py
 
 Quick and simple tool to dump/search gadgets based on one or more files.
@@ -98,5 +75,8 @@ options:
   --base BASE           Use custom specified BaseAddress (for ASLR Bypassing) 
 ```
 
-### References
-https://github.com/epi052/osed-scripts/tree/main
+All the other tools are taken from the below listed references:
+https://github.com/epi052/osed-scripts
+https://github.com/nop-tech/code_caver
+https://github.com/epi052/osed-scripts
+https://github.com/0vercl0k/rp
